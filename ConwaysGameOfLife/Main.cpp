@@ -15,12 +15,15 @@ class Game : public olc::PixelGameEngine
 private:
 	int m_Scale = 4;
 	int** m_Board;
+	int** m_AliveBoard;
 	bool m_SimulationStarted = false;
 public:
-	Game() : m_Board(new int*[SIZE])
+	Game() : m_Board(new int*[SIZE]), m_AliveBoard(new int*[SIZE])
 	{
 		for (int i = 0; i < SIZE; ++i)
 			m_Board[i] = new int[SIZE];
+		for (int i = 0; i < SIZE; ++i)
+			m_AliveBoard[i] = new int[SIZE];
 		sAppName = "Conway's Game of Life";
 	}
 	~Game()
@@ -28,13 +31,19 @@ public:
 		for (int i = 0; i < SIZE; ++i)
 			delete[] m_Board[i];
 		delete[] m_Board;
+		for (int i = 0; i < SIZE; ++i)
+			delete[] m_AliveBoard[i];
+		delete[] m_AliveBoard;
 	}
 private:
 	void InitializePopulation()
 	{
 		for (int i = 0; i < SIZE; i += 1)
 			for (int j = 0; j < SIZE; j += 1)
+			{
 				m_Board[i][j] = 0;
+				m_AliveBoard[i][j] = 0;
+			}
 	}
 	int CountNeighbours(int x, int y)
 	{
@@ -57,11 +66,22 @@ private:
 			count += m_Board[x + 1][y + 1];
 		return count;
 	}
+	void ClearAliveBoard()
+	{
+		for (int i = 0; i < SIZE; ++i)
+			for (int j = 0; j < SIZE; ++j)
+				m_AliveBoard[i][j] = 0;
+	}
 	void RandomPopulation()
 	{
-		for (int i = 0; i < SIZE; i += 1)
-			for (int j = 0; j < SIZE; j += 1)
+		ClearAliveBoard();
+		for (int i = 0; i < SIZE; i++)
+			for (int j = 0; j < SIZE; j++)
+			{
 				m_Board[i][j] = rand() % 10 >= 7 ? 1 : 0;
+				if (m_Board[i][j])
+					m_AliveBoard[i][j] = 1;
+			}
 	}
 	void UpdatePopulation()
 	{
@@ -73,11 +93,17 @@ private:
 			{
 				int neighbourCount = CountNeighbours(x, y);
 				if (m_Board[x][y] == 1 && neighbourCount >= 2 && neighbourCount <= 3)
+				{
 					newPopulation[x][y] = 1;
+					m_AliveBoard[x][y] = 1;
+				}
 				else if (m_Board[x][y] == 1 && neighbourCount > 3)
 					newPopulation[x][y] = 0;
 				else if (m_Board[x][y] == 0 && neighbourCount == 3)
+				{
 					newPopulation[x][y] = 1;
+					m_AliveBoard[x][y] = 1;
+				}
 				else
 					newPopulation[x][y] = 0;
 			}
@@ -139,7 +165,7 @@ public:
 		for (int x = 0; x < SIZE; x++)
 			for (int y = 0; y < SIZE; y++)
 			{
-				olc::Pixel color = m_Board[x][y] == 1 ? olc::BLACK : olc::WHITE;
+				olc::Pixel color = m_Board[x][y] == 1 ? olc::BLACK : (m_AliveBoard[x][y] ? olc::GREEN : olc::WHITE);
 				Draw(x, y, color);
 			}
 
