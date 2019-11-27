@@ -149,9 +149,7 @@ public:
 		}
 
 #if UPDATE_RANDOM
-		for (int i = 0; i < SIZE; ++i)
-			for (int j = 0; j < SIZE; ++j)
-				m_Board[i][j] = (rand() % 10 >= 9) ? 1 : 0;
+		RandomPopulation();
 #else
 		if (m_SimulationStarted)
 			UpdatePopulation();
@@ -162,6 +160,7 @@ public:
 		return true;
 	}
 };
+
 int main()
 {
 	srand(time(NULL));
