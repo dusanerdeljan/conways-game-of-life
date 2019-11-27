@@ -10,7 +10,6 @@
 #define UPDATE_RANDOM 0
 #define ALLOW_DRAW 1
 
-// test komentar
 class Game : public olc::PixelGameEngine
 {
 private:
